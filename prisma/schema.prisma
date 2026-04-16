@@ -1,0 +1,154 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  phone     String   @unique
+  password  String
+  role      Role     @default(USER)
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([phone])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?   @db.Text
+  image       String?
+  products    Product[]
+  createdAt   DateTime  @default(now())
+
+  @@index([slug])
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?  @db.Text
+  price       Float
+  stock       Int      @default(0)
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+  images      String   @default("[]") // JSON array of image URLs
+  isActive    Boolean  @default(true)
+  orderItems  OrderItem[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+  @@index([categoryId])
+  @@index([isActive])
+}
+
+model Order {
+  id                String        @id @default(cuid())
+  userId            String?
+  user              User?         @relation(fields: [userId], references: [id])
+  customerName      String
+  customerPhone     String
+  customerAddress   String        @db.Text
+  subtotal          Float
+  deliveryFee       Float         @default(0)
+  total             Float
+  paymentMethod     PaymentMethod
+  paymentStatus     PaymentStatus @default(PENDING)
+  orderStatus       OrderStatus   @default(PENDING)
+  deliveryAgencyId  String?
+  deliveryAgency    DeliveryAgency? @relation(fields: [deliveryAgencyId], references: [id])
+  notes             String?       @db.Text
+  orderItems        OrderItem[]
+  payments          Payment[]
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([customerPhone])
+  @@index([orderStatus])
+  @@index([paymentStatus])
+  @@index([userId])
+}
+
+enum PaymentMethod {
+  MOMO
+  ORANGE_MONEY
+  COD
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+enum OrderStatus {
+  PENDING
+  AWAITING_PAYMENT
+  PAID
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float // Price at order time
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model Payment {
+  id              String   @id @default(cuid())
+  orderId         String
+  order           Order    @relation(fields: [orderId], references: [id])
+  amount          Float
+  paymentMethod   PaymentMethod
+  transactionId   String?  @unique
+  status          PaymentStatus
+  gatewayResponse String?  @db.Text // JSON response from payment gateway
+  paidAt          DateTime?
+  createdAt       DateTime @default(now())
+
+  @@index([orderId])
+  @@index([transactionId])
+  @@index([status])
+}
+
+model DeliveryAgency {
+  id            String   @id @default(cuid())
+  name          String
+  phone         String
+  coverageArea  String   @db.Text // JSON array of cities/areas
+  deliveryFee   Float    @default(0)
+  isActive      Boolean  @default(true)
+  rating        Float    @default(0)
+  orders        Order[]
+  createdAt     DateTime @default(now())
+
+  @@index([isActive])
+}
