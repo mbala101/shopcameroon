@@ -264,6 +264,7 @@ function ProductDetailContent() {
             {/* Action Buttons */}
             <div className="flex gap-3 mb-6">
               <button
+                type="button"
                 onClick={handleAddToCart}
                 disabled={!inStock}
                 className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg font-semibold transition ${
@@ -276,6 +277,7 @@ function ProductDetailContent() {
                 {addedToCart ? 'Added to Cart!' : 'Add to Cart'}
               </button>
               <button
+                type="button"
                 onClick={handleBuyNow}
                 disabled={!inStock}
                 className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
