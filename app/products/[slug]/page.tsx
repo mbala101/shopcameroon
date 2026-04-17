@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Heart, Share2, ShoppingCart, Truck, Shield, RotateCcw, Star, ChevronLeft, ChevronRight, Minus, Plus } from 'lucide-react';
@@ -30,7 +30,7 @@ interface RelatedProduct {
   images: string;
 }
 
-export default function ProductDetailPage() {
+function ProductDetailContent() {
   const params = useParams();
   const router = useRouter();
   const slug = params.slug as string;
@@ -334,5 +334,20 @@ export default function ProductDetailPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ProductDetailPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading product...</p>
+        </div>
+      </div>
+    }>
+      <ProductDetailContent />
+    </Suspense>
   );
 }
