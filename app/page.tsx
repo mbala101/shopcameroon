@@ -1,7 +1,46 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, ShoppingCart, Menu, ChevronRight, Star, Truck, Shield, RotateCcw, MapPin, User, Heart } from 'lucide-react';
 
+interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  images: string;
+  stock: number;
+  category: {
+    name: string;
+    slug: string;
+  };
+}
+
 export default function Home() {
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/products?limit=10')
+      .then(res => res.json())
+      .then(data => {
+        setFeaturedProducts(data.products || []);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to fetch products:', err);
+        setLoading(false);
+      });
+  }, []);
+
+  const parseImages = (imagesString: string): string[] => {
+    try {
+      return JSON.parse(imagesString);
+    } catch {
+      return ['/placeholder-product.png'];
+    }
+  };
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Top Bar */}
@@ -87,14 +126,14 @@ export default function Home() {
             <div className="flex items-center gap-1 font-semibold">
               <Menu size={16} /> All
             </div>
-            <Link href="#" className="hover:text-yellow-400 whitespace-nowrap">Today's Deals</Link>
-            <Link href="#" className="hover:text-yellow-400 whitespace-nowrap">Customer Service</Link>
-            <Link href="#" className="hover:text-yellow-400 whitespace-nowrap">Electronics</Link>
-            <Link href="#" className="hover:text-yellow-400 whitespace-nowrap">Fashion</Link>
-            <Link href="#" className="hover:text-yellow-400 whitespace-nowrap">Home & Kitchen</Link>
-            <Link href="#" className="hover:text-yellow-400 whitespace-nowrap">Phones</Link>
-            <Link href="#" className="hover:text-yellow-400 whitespace-nowrap">Computers</Link>
-            <Link href="#" className="hover:text-yellow-400 whitespace-nowrap">Grocery</Link>
+            <Link href="/products" className="hover:text-yellow-400 whitespace-nowrap">Today's Deals</Link>
+            <Link href="/products" className="hover:text-yellow-400 whitespace-nowrap">Customer Service</Link>
+            <Link href="/products?category=electronics" className="hover:text-yellow-400 whitespace-nowrap">Electronics</Link>
+            <Link href="/products?category=fashion" className="hover:text-yellow-400 whitespace-nowrap">Fashion</Link>
+            <Link href="/products?category=home-kitchen" className="hover:text-yellow-400 whitespace-nowrap">Home & Kitchen</Link>
+            <Link href="/products?category=phones-tablets" className="hover:text-yellow-400 whitespace-nowrap">Phones</Link>
+            <Link href="/products?category=electronics" className="hover:text-yellow-400 whitespace-nowrap">Computers</Link>
+            <Link href="/products?category=groceries" className="hover:text-yellow-400 whitespace-nowrap">Grocery</Link>
           </div>
         </div>
       </nav>
@@ -142,24 +181,41 @@ export default function Home() {
         <section className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold">Shop by Category</h2>
-            <Link href="#" className="text-sm text-green-600 hover:underline flex items-center">See all <ChevronRight size={16} /></Link>
+            <Link href="/products" className="text-sm text-green-600 hover:underline flex items-center">See all <ChevronRight size={16} /></Link>
           </div>
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
-            {['Electronics', 'Fashion', 'Home', 'Phones', 'Computers', 'Grocery', 'Toys', 'Sports'].map((cat) => (
-              <Link key={cat} href="#" className="bg-white p-3 rounded-lg shadow-sm text-center hover:shadow-md transition">
-                <div className="h-16 w-16 mx-auto bg-gray-100 rounded-full mb-2 flex items-center justify-center text-2xl">
-                  {cat === 'Electronics' && '📱'}
-                  {cat === 'Fashion' && '👕'}
-                  {cat === 'Home' && '🏠'}
-                  {cat === 'Phones' && '📞'}
-                  {cat === 'Computers' && '💻'}
-                  {cat === 'Grocery' && '🥬'}
-                  {cat === 'Toys' && '🧸'}
-                  {cat === 'Sports' && '⚽'}
-                </div>
-                <span className="text-xs md:text-sm">{cat}</span>
-              </Link>
-            ))}
+            <Link href="/products?category=electronics" className="bg-white p-3 rounded-lg shadow-sm text-center hover:shadow-md transition">
+              <div className="h-16 w-16 mx-auto bg-gray-100 rounded-full mb-2 flex items-center justify-center text-2xl">📱</div>
+              <span className="text-xs md:text-sm">Electronics</span>
+            </Link>
+            <Link href="/products?category=fashion" className="bg-white p-3 rounded-lg shadow-sm text-center hover:shadow-md transition">
+              <div className="h-16 w-16 mx-auto bg-gray-100 rounded-full mb-2 flex items-center justify-center text-2xl">👕</div>
+              <span className="text-xs md:text-sm">Fashion</span>
+            </Link>
+            <Link href="/products?category=home-kitchen" className="bg-white p-3 rounded-lg shadow-sm text-center hover:shadow-md transition">
+              <div className="h-16 w-16 mx-auto bg-gray-100 rounded-full mb-2 flex items-center justify-center text-2xl">🏠</div>
+              <span className="text-xs md:text-sm">Home</span>
+            </Link>
+            <Link href="/products?category=phones-tablets" className="bg-white p-3 rounded-lg shadow-sm text-center hover:shadow-md transition">
+              <div className="h-16 w-16 mx-auto bg-gray-100 rounded-full mb-2 flex items-center justify-center text-2xl">📞</div>
+              <span className="text-xs md:text-sm">Phones</span>
+            </Link>
+            <Link href="/products?category=electronics" className="bg-white p-3 rounded-lg shadow-sm text-center hover:shadow-md transition">
+              <div className="h-16 w-16 mx-auto bg-gray-100 rounded-full mb-2 flex items-center justify-center text-2xl">💻</div>
+              <span className="text-xs md:text-sm">Computers</span>
+            </Link>
+            <Link href="/products?category=groceries" className="bg-white p-3 rounded-lg shadow-sm text-center hover:shadow-md transition">
+              <div className="h-16 w-16 mx-auto bg-gray-100 rounded-full mb-2 flex items-center justify-center text-2xl">🥬</div>
+              <span className="text-xs md:text-sm">Grocery</span>
+            </Link>
+            <Link href="/products" className="bg-white p-3 rounded-lg shadow-sm text-center hover:shadow-md transition">
+              <div className="h-16 w-16 mx-auto bg-gray-100 rounded-full mb-2 flex items-center justify-center text-2xl">🧸</div>
+              <span className="text-xs md:text-sm">Toys</span>
+            </Link>
+            <Link href="/products" className="bg-white p-3 rounded-lg shadow-sm text-center hover:shadow-md transition">
+              <div className="h-16 w-16 mx-auto bg-gray-100 rounded-full mb-2 flex items-center justify-center text-2xl">⚽</div>
+              <span className="text-xs md:text-sm">Sports</span>
+            </Link>
           </div>
         </section>
 
@@ -169,31 +225,81 @@ export default function Home() {
             <h2 className="text-xl font-bold">Featured Products</h2>
             <Link href="/products" className="text-sm text-green-600 hover:underline flex items-center">View all <ChevronRight size={16} /></Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {[1,2,3,4,5,6,7,8,9,10].map((item) => (
-              <div key={item} className="bg-white rounded-lg shadow-sm hover:shadow-md transition p-3">
-                <div className="relative">
-                  <div className="h-40 bg-gray-100 rounded-md mb-3 flex items-center justify-center text-4xl">
-                    📦
-                  </div>
-                  <button className="absolute top-2 right-2 p-1.5 bg-white rounded-full shadow-sm">
-                    <Heart size={16} className="text-gray-400" />
-                  </button>
+          {loading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {[...Array(10)].map((_, i) => (
+                <div key={i} className="bg-white rounded-lg shadow-sm p-3 animate-pulse">
+                  <div className="h-40 bg-gray-200 rounded mb-3"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-2 w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
                 </div>
-                <div className="flex items-center gap-1 text-sm mb-1">
-                  <div className="flex text-yellow-400">★★★★☆</div>
-                  <span className="text-gray-500 text-xs">(124)</span>
-                </div>
-                <h3 className="font-medium text-sm line-clamp-2 mb-1">Product Name {item} - High Quality Item</h3>
-                <div className="text-lg font-bold text-green-600">25,000 FCFA</div>
-                <div className="text-xs text-gray-400 line-through">35,000 FCFA</div>
-                <div className="flex justify-between items-center mt-2">
-                  <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">Free Shipping</span>
-                  <button className="text-green-600 text-sm font-semibold">Buy Now</button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : featuredProducts.length === 0 ? (
+            <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+              <div className="text-6xl mb-4">📦</div>
+              <h3 className="text-xl font-bold mb-2">No products available</h3>
+              <p className="text-gray-600 mb-4">Please seed the database first</p>
+              <a 
+                href="/api/seed?secret=shopcameroon2024"
+                className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 inline-block"
+              >
+                Load Sample Products
+              </a>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {featuredProducts.map((product) => {
+                const images = parseImages(product.images);
+                return (
+                  <Link
+                    key={product.id}
+                    href={`/products/${product.slug}`}
+                    className="bg-white rounded-lg shadow-sm hover:shadow-md transition p-3 block"
+                  >
+                    <div className="relative">
+                      <div className="h-40 bg-gray-100 rounded-md mb-3 overflow-hidden">
+                        <img
+                          src={images[0] || '/placeholder-product.png'}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <button className="absolute top-2 right-2 p-1.5 bg-white rounded-full shadow-sm hover:bg-gray-50">
+                        <Heart size={16} className="text-gray-400" />
+                      </button>
+                      {product.stock < 5 && product.stock > 0 && (
+                        <div className="absolute top-2 left-2 bg-orange-500 text-white text-xs px-2 py-1 rounded">
+                          Only {product.stock} left
+                        </div>
+                      )}
+                      {product.stock === 0 && (
+                        <div className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                          Out of Stock
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1 text-sm mb-1">
+                      <div className="flex text-yellow-400">★★★★☆</div>
+                      <span className="text-gray-500 text-xs">(24)</span>
+                    </div>
+                    <h3 className="font-medium text-sm line-clamp-2 mb-1">{product.name}</h3>
+                    <div className="text-lg font-bold text-green-600">
+                      {product.price.toLocaleString()} FCFA
+                    </div>
+                    <div className="flex justify-between items-center mt-2">
+                      <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">
+                        Free Shipping
+                      </span>
+                      <span className="text-green-600 text-sm font-semibold hover:underline">
+                        View Details
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </section>
 
         {/* Deal of the Day */}
@@ -201,44 +307,65 @@ export default function Home() {
           <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-6 py-3">
             <h2 className="text-xl font-bold">🔥 Deal of the Day - 62% OFF</h2>
           </div>
-          <div className="p-6 flex flex-col md:flex-row gap-6">
+          <Link href="/products/jbl-bluetooth-speaker" className="p-6 flex flex-col md:flex-row gap-6 hover:bg-gray-50 transition">
             <div className="md:w-1/3 flex justify-center">
-              <div className="h-48 w-48 bg-gray-100 rounded-lg flex items-center justify-center text-6xl">🎧</div>
+              <div className="h-48 w-48 bg-gray-100 rounded-lg overflow-hidden">
+                <img 
+                  src="https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=500"
+                  alt="JBL Bluetooth Speaker"
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
             <div className="md:w-2/3">
-              <h3 className="text-2xl font-bold mb-2">Wireless Noise Cancelling Headphones</h3>
+              <h3 className="text-2xl font-bold mb-2">JBL Bluetooth Speaker - Portable</h3>
               <div className="flex items-center gap-2 mb-3">
                 <div className="flex text-yellow-400">★★★★★</div>
                 <span className="text-sm text-gray-500">(2,345 reviews)</span>
               </div>
-              <div className="text-3xl font-bold text-green-600 mb-1">45,000 FCFA</div>
-              <div className="text-gray-400 line-through mb-3">118,500 FCFA</div>
+              <div className="text-3xl font-bold text-green-600 mb-1">35,000 FCFA</div>
+              <div className="text-gray-400 line-through mb-3">92,000 FCFA</div>
               <div className="flex gap-3 mb-4">
                 <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm">Limited Stock</span>
                 <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">Free Shipping</span>
               </div>
               <div className="flex gap-3">
-                <Link href="/products" className="bg-yellow-400 hover:bg-yellow-500 px-6 py-2 rounded-md font-semibold">Add to Cart</Link>
-                <Link href="/products" className="border border-gray-300 hover:border-gray-400 px-6 py-2 rounded-md font-semibold">View Details</Link>
+                <button className="bg-yellow-400 hover:bg-yellow-500 px-6 py-2 rounded-md font-semibold">Add to Cart</button>
+                <span className="border border-gray-300 hover:border-gray-400 px-6 py-2 rounded-md font-semibold inline-block">View Details</span>
               </div>
             </div>
-          </div>
+          </Link>
         </section>
 
         {/* Recommended For You */}
         <section className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold">Recommended For You</h2>
-            <Link href="#" className="text-sm text-green-600 hover:underline">More recommendations</Link>
+            <Link href="/products" className="text-sm text-green-600 hover:underline">More recommendations</Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-            {[1,2,3,4,5,6].map((item) => (
-              <div key={item} className="bg-white rounded-lg shadow-sm hover:shadow-md transition p-2 text-center">
-                <div className="h-24 bg-gray-100 rounded-md mb-2 flex items-center justify-center text-2xl">📱</div>
-                <h3 className="text-xs font-medium line-clamp-2">Recommended Product {item}</h3>
-                <div className="text-sm font-bold text-green-600">18,500 FCFA</div>
-              </div>
-            ))}
+            {featuredProducts.slice(0, 6).map((product) => {
+              const images = parseImages(product.images);
+              return (
+                <Link
+                  key={product.id}
+                  href={`/products/${product.slug}`}
+                  className="bg-white rounded-lg shadow-sm hover:shadow-md transition p-2 text-center block"
+                >
+                  <div className="h-24 bg-gray-100 rounded-md mb-2 overflow-hidden">
+                    <img
+                      src={images[0] || '/placeholder-product.png'}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <h3 className="text-xs font-medium line-clamp-2 mb-1">{product.name}</h3>
+                  <div className="text-sm font-bold text-green-600">
+                    {product.price.toLocaleString()} FCFA
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </section>
 
